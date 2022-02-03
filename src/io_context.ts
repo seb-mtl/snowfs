@@ -280,7 +280,7 @@ export function getDrives(): Promise<Map<string, Drive>> {
         if (exitcode === 0) {
   
           const lines = stdout.toString().split('\n');
-          for (const line of lines) {
+          for (const line of lines.slice(1)) { // slice to skip header
             if (line === '') {
               continue;
             }
