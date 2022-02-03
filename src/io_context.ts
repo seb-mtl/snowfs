@@ -178,7 +178,7 @@ export namespace win32 {
   
         child.on('error', (error) => {
           console.log(error);
-          reject();
+          reject(error);
         });
       } catch (error) {
         reject(new Error(`initWindowsNetworkDrives spawn failed: ${getErrorMessage(error)}`));
