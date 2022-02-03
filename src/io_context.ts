@@ -1,51 +1,49 @@
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
 import * as os from 'os';
-
-import { exec, spawn } from 'child_process';
-import {
-  join, dirname, normalize, relative,
-} from './path';
 import * as io from './io';
 
-import trash = require('trash');
+import { spawn } from 'child_process';
+import { join, dirname, normalize, relative } from './path';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+import getDriveType = require("get-drive-type");
+
 import AggregateError = require('es-aggregate-error');
-import drivelist = require('drivelist');
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PromisePool } = require('@supercharge/promise-pool');
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { trash } = require('trash');
+
 class StacklessError extends Error {
-  constructor(...args: any) {
-    super(...args);
+  constructor(message: string) {
+    super(message);
     this.name = this.constructor.name;
     delete this.stack;
-  }
-}
-
-export enum FILESYSTEM {
-  APFS = 1,
-  HFS_PLUS = 2,
-  REFS = 3,
-  NTFS = 4,
-  FAT32 = 5,
-  FAT16 = 6,
-  OTHER = 7
-}
-
-export class Drive {
-  displayName: string;
-
-  filesystem: FILESYSTEM;
-
-  constructor(displayName: string, filesystem: FILESYSTEM) {
-    this.displayName = displayName;
-    this.filesystem = filesystem;
   }
 }
 
 export enum TEST_IF {
   FILE_CAN_BE_READ_FROM = 1,
   FILE_CAN_BE_WRITTEN_TO = 2
+}
+
+export enum FILESYSTEM {
+  APFS = 'apfs',
+  HFS_PLUS = 'hfs+',
+  REFS = 'refs',
+  NTFS = 'ntfs',
+  FAT32 = 'fat32',
+  FAT16 = 'fat16',
+  SMBFS = 'smbfs',
+  UNKNOWN = 'unknown'
+}
+
+class Drive {
+  constructor(public label: string, public mountpoint: string, public isNetworkDrive: boolean) { }
+  filesystem: FILESYSTEM;
 }
 
 /**
@@ -58,6 +56,23 @@ function strEncodeUTF16(str: string) : Uint8Array {
     bufView[i] = str.charCodeAt(i);
   }
   return new Uint8Array(buf);
+}
+
+export function getDrives(): Promise<Map<string, Drive>> {
+  let promise: Promise<Map<string, Drive>>;
+  if (process.platform === 'win32') {
+    promise = win32.getDrives();
+  } else {
+    promise = unix.getDrives();
+  }
+
+  return promise.then((drives: Map<string, Drive>) => {
+    for (const drive of Array.from(drives.values())) {
+      drive.filesystem = getDriveType(drive.mountpoint);
+    }
+    return drives;
+  })
+  
 }
 
 /**
@@ -122,6 +137,53 @@ export function checkReadAccess(absPaths: string[], relPaths: string[]): Promise
 }
 
 export namespace win32 {
+
+  export function getDrives(): Promise<Map<string, Drive>> {
+    return new Promise((resolve, reject) => {
+      try {
+        const child = cp.spawn("powershell.exe", ["get-psdrive -psprovider filesystem | select-object name,root,displayroot | convertto-json"]);
+        
+        let stdout = Buffer.from([]);
+        child.stdout.on("data", (data: Buffer) => {
+          stdout = Buffer.concat([stdout, data]);
+        });
+        child.on('exit', (exitcode: number | null) => {
+          if (exitcode === 0) {
+            try {
+              const networkDrives = new Map<string, Drive>();
+  
+              type DriveItem = {Name: string | null, Root: string | null, DisplayRoot: string | null};
+              
+              let driveItems: DriveItem | DriveItem[] = JSON.parse(stdout.toString());
+              // convertto-json from the powershell command doesn't return an array if there is only one drive
+              if (!Array.isArray(driveItems)) {
+                driveItems = [driveItems];
+              }
+  
+              for (const mountpoint of driveItems) {
+                if (mountpoint.DisplayRoot) {
+                  networkDrives.set(mountpoint.Root, new Drive(mountpoint.Name, mountpoint.Root, mountpoint.DisplayRoot.startsWith('\\')));
+                }
+              }
+      
+              resolve(networkDrives);
+            } catch (error) {
+              reject(new Error(`get-psdrive: ${error.message}`));
+            }
+          } else {
+            reject(new Error(`get-psdrive failed with ${exitcode}`));
+          }
+        });
+  
+        child.on('error', (error) => {
+          console.log(error);
+          reject();
+        });
+      } catch (error) {
+        reject(new Error(`initWindowsNetworkDrives spawn failed: ${error.message}`));
+      }
+    });
+  }
 
   /**
    * Check if the passed files are open by any other process.
@@ -200,6 +262,10 @@ export class FileHandle {
 
   /** Documents filepath */
   filepath: string;
+}
+
+export function getDrives(): Promise<Map<string, Drive>> {
+  return Promise.resolve(new Map());
 }
 
 export function whichFilesInDirAreOpen(dirpath: string): Promise<Map<string, FileHandle[]>> {
@@ -281,58 +347,6 @@ export function whichFilesInDirAreOpen(dirpath: string): Promise<Map<string, Fil
 
 }
 
-function getFilesystem(drive: any, mountpoint: string): Promise<FILESYSTEM> {
-  try {
-    if (process.platform === 'win32') {
-      return new Promise<string | null>((resolve) => {
-        const driveLetter = mountpoint.endsWith('\\') ? mountpoint.substring(0, mountpoint.length - 1) : mountpoint;
-        exec(`fsutil fsinfo volumeinfo ${driveLetter}`, (error, stdout) => {
-          if (error) {
-            return resolve(null); // if we can't extract the volume info, we simply skip the ReFS detection
-          }
-
-          const lines = stdout.replace(/\r\n/g, '\r').replace(/\n/g, '\r').split(/\r/);
-          for (const line of lines) {
-            if (line.startsWith('File System Name :')) {
-              const filesystem: string = line.split(':', 2)[1].trim();
-              return resolve(filesystem);
-            }
-          }
-          return resolve(null);
-        });
-      }).then((filesystem: string | null) => {
-        if (filesystem) {
-          // eslint-disable-next-line default-case
-          switch (filesystem.toLowerCase()) {
-            case 'refs':
-              return FILESYSTEM.REFS;
-            case 'ntfs':
-              return FILESYSTEM.NTFS;
-            case 'fat16':
-              return FILESYSTEM.FAT16;
-            case 'fat32':
-            case 'fat':
-              return FILESYSTEM.FAT32;
-          }
-        }
-        return FILESYSTEM.OTHER;
-      }).catch(() => {
-        return FILESYSTEM.OTHER;
-      });
-    }
-    if (process.platform === 'darwin') {
-      const isApfs: boolean = (drive.description === 'AppleAPFSMedia');
-      if (isApfs) {
-        return Promise.resolve(FILESYSTEM.APFS);
-      }
-    }
-  } catch (error) {
-    return Promise.resolve(FILESYSTEM.OTHER);
-  }
-
-  return Promise.resolve(FILESYSTEM.OTHER);
-}
-
 type TrashExecutor = string | ((item: string[] | string) => void);
 
 /**
@@ -361,9 +375,6 @@ export class IoContext {
    * of the currently active system. If undefined or null the path is guessed.
    */
   private static trashExecutor?: TrashExecutor;
-
-  /** Original returned object from `drivelist` */
-  origDrives: any;
 
   /** Map of drive objects with mountpoints as the key */
   drives: Map<string, Drive>;
@@ -450,44 +461,22 @@ export class IoContext {
   }
 
   init(): Promise<void> {
-    const tmpDrives: [string, string][] = [];
     if (process.platform !== 'darwin') {
       this.valid = true;
       return Promise.resolve();
     } else {
-      return drivelist.list().then((drives: any) => {
-        this.origDrives = drives;
-        this.mountpoints = new Set();
-        this.drives = new Map();
-  
-        for (const drive of drives) {
-          for (const mountpoint of drive.mountpoints) {
-            if (mountpoint && !mountpoint.path.startsWith('/System/')) {
-              this.mountpoints.add(normalize(mountpoint.path));
+      return getDrives()
+        .then((drives: Map<string, Drive>) => {
+          this.mountpoints = new Set();
+          this.drives = new Map();
+    
+          for (const drive of Array.from(drives.values())) {
+            if (!drive.mountpoint.startsWith('/System/')) {
+              this.mountpoints.add(normalize(drive.mountpoint));
             }
           }
-        }
-  
-        const promises: Promise<FILESYSTEM>[] = [];
-  
-        for (const drive of drives) {
-          for (const mountpoint of drive.mountpoints) {
-            promises.push(getFilesystem(drive, normalize(mountpoint.path)));
-            tmpDrives.push([normalize(mountpoint.path), mountpoint.label]);
-          }
-        }
-        return Promise.all(promises);
-      }).then((res: FILESYSTEM[]) => {
-        let i = 0;
-        res.forEach((filesystem: FILESYSTEM) => {
-          if (!tmpDrives[i][0].startsWith('/System/')) {
-            this.drives.set(tmpDrives[i][0], new Drive(tmpDrives[i][1], filesystem));
-          }
-          i++;
+          this.valid = true;  
         });
-      }).then(() => {
-        this.valid = true;
-      });
     }
   }
 

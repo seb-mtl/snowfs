@@ -13,11 +13,12 @@ import {
   StatusEntry, FILTER, Repository, RESET, COMMIT_ORDER, REFERENCE_TYPE,
 } from './src/repository';
 import { TreeDir, TreeEntry, TreeFile } from './src/treedir';
-import { IoContext } from './src/io_context';
+import { getDrives, IoContext } from './src/io_context';
 
-const program = require('commander');
-const chalk = require('chalk');
-const drivelist = require('drivelist');
+import * as program from 'commander';
+import * as chalk from 'chalk';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const AggregateError = require('es-aggregate-error');
 
 const versionString = '0.9.3';
@@ -650,9 +651,9 @@ program
   .command('driveinfo')
   .option('--output [format=json-pretty]', "currently supported output formats 'json', 'json-pretty'")
   .description('List all connected drives in your computer, in all major operating systems')
-  .action(async (opts: any) => {
-    const drives = await drivelist.list();
-    console.log(JSON.stringify(drives, null, opts.output === 'json' ? '' : '    '));
+  .action(async (opts: {input?: string, output?: string}) => {
+    const drives = await getDrives();
+    console.log(JSON.stringify(drives.values(), null, opts.output === 'json' ? '' : '    '));
   });
 
 program
