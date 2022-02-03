@@ -748,7 +748,7 @@ test('Multi-Index -- FAIL INVALID INPUT TEST 1', async (t) => {
   t.log('Test failed as expected');
 });
 
-test.only('driveinfo test', async (t) => {
+test('driveinfo test', async (t) => {
   const snow: string = getSnowexec();
 
   const out1 = await exec(t, snow, ['driveinfo'], {}, EXEC_OPTIONS.RETURN_STDOUT) as string;
