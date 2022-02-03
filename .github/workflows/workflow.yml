@@ -21,8 +21,7 @@ jobs:
           persist-credentials: false
 
       - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+        run: git config --global url.https://${{ secrets.SNOWFS_WORKFLOW_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
@@ -43,8 +42,7 @@ jobs:
           persist-credentials: false
 
       - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+        run: git config --global url.https://${{ secrets.SNOWFS_WORKFLOW_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
@@ -72,8 +70,7 @@ jobs:
           persist-credentials: false
 
       - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+        run: git config --global url.https://${{ secrets.SNOWFS_WORKFLOW_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
@@ -121,8 +118,7 @@ jobs:
           persist-credentials: false
 
       - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+        run: git config --global url.https://${{ secrets.SNOWFS_WORKFLOW_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
@@ -175,8 +171,7 @@ jobs:
           persist-credentials: false
 
       - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+        run: git config --global url.https://${{ secrets.SNOWFS_WORKFLOW_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
