@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import * as fse from 'fs-extra';
-import * as chalk from 'chalk';
 
 import * as readline from 'readline';
 import {
@@ -22,6 +21,9 @@ const program = require('commander');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AggregateError = require('es-aggregate-error');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const chalk = require('chalk');
 
 const versionString = '0.9.3';
 

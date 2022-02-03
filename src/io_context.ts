@@ -266,7 +266,37 @@ export class FileHandle {
 }
 
 export function getDrives(): Promise<Map<string, Drive>> {
-  return Promise.resolve(new Map());
+
+  return new Promise((resolve, reject) => {
+    try {
+      const child = cp.spawn("/bin/df", ["-n", "-P"]);
+      const drives = new Map<string, Drive>();
+    
+      let stdout = Buffer.from([]);
+      child.stdout.on("data", (data: Buffer) => {
+        stdout = Buffer.concat([stdout, data]);
+      });
+      child.on('exit', (exitcode: number | null) => {
+        if (exitcode === 0) {
+  
+          const lines = stdout.toString().split('\n');
+          for (const line of lines.slice(1)) { // slice to skip header
+            if (line === '') {
+              continue;
+            }
+        
+            const tokens = line.replace(/ +(?= )/g, '').split(' ');
+            drives.set(tokens[5], new Drive(tokens[5], tokens[5], tokens[0].startsWith('//')));
+          }
+          resolve(drives);
+        } else {
+          reject(new Error(`df -n -P failed with ${exitcode}`));
+        }
+      });
+    } catch (error) {
+      reject(new Error(`initWindowsNetworkDrives spawn failed: ${getErrorMessage(error)}`));
+    }
+  });
 }
 
 export function whichFilesInDirAreOpen(dirpath: string): Promise<Map<string, FileHandle[]>> {
