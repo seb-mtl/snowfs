@@ -269,7 +269,16 @@ export function getDrives(): Promise<Map<string, Drive>> {
 
   return new Promise((resolve, reject) => {
     try {
-      const child = cp.spawn("/bin/df", ["-n", "-P"]);
+      const child = cp.spawn("/bin/df", [
+                                        "-n", /* -n Print out the previously obtained statistics from the filesystems.
+                                              This option should be used if it is possible that one or more
+                                              filesystems are in a state such that they will not be able to
+                                              provide statistics without a long delay.  When this option is
+                                              specified, df will not request new statistics from the filesystems,
+                                              but will respond with the possibly stale statistics that were
+                                              previously obtained.
+                                            */
+                                        ]);
       const drives = new Map<string, Drive>();
     
       let stdout = Buffer.from([]);
@@ -280,7 +289,7 @@ export function getDrives(): Promise<Map<string, Drive>> {
         if (exitcode === 0) {
   
           const lines = stdout.toString().split('\n');
-          for (const line of lines.slice(1)) { // slice to skip header
+          for (const line of lines.slice(1)) { // slice to skip header "Filesystem\tSize\t..."
             if (line === '') {
               continue;
             }
