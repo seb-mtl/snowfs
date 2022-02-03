@@ -87,8 +87,6 @@ jobs:
           npm run build -- --target node14-linux-x64 --output=dist/snow
           dist/snow --version
           find dist -mindepth 1 ! -name snow -delete
-          mkdir -p dist/node_modules/drivelist/build/Release/
-          cp node_modules/drivelist/build/Release/drivelist.node dist/node_modules/drivelist/build/Release/drivelist.node
           cp -r resources dist
 
       - name: 'Tar files'
@@ -136,8 +134,6 @@ jobs:
           npm run build -- --target node14-macos-x64 --output=dist/snow
           dist/snow --version
           find dist -mindepth 1 ! -name snow -delete
-          mkdir -p dist/node_modules/drivelist/build/Release/
-          cp node_modules/drivelist/build/Release/drivelist.node dist/node_modules/drivelist/build/Release/drivelist.node
           cp -r resources dist
 
       - name: 'Tar files'
@@ -182,8 +178,6 @@ jobs:
           npm run tsc
           npm run build -- --target node14-win-x64 --output=dist/snow.exe
           dist/snow.exe --version
-          New-Item -Path dist/node_modules/drivelist/build/Release -ItemType Directory -Force
-          cp node_modules/drivelist/build/Release/drivelist.node dist/node_modules/drivelist/build/Release/drivelist.node
           Copy-Item -Path resources -Destination dist -recurse -Force
 
       - name: Publish Artifact
@@ -193,7 +187,6 @@ jobs:
           path: |
             dist/snow.exe
             dist/resources
-            dist/node_modules/drivelist/build/Release/drivelist.node
 
 
   finish:
