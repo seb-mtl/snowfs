@@ -88,10 +88,10 @@ export function exec(t, command: string, args?: string[], opts?: {cwd?: string},
   stdiopts?: EXEC_OPTIONS, stdin = ''): Promise<void | string> {
   t.log(`Execute ${command} ${args.join(' ')}`);
 
-  const p0 = spawn(command, args ?? [], { cwd: opts?.cwd ?? '.', env: Object.assign(process.env, { SUPPRESS_BANNER: 'true' }) });
   return new Promise((resolve, reject) => {
+    const p0 = spawn(command, args ?? [], { cwd: opts?.cwd ?? '.', env: Object.assign(process.env, { SUPPRESS_BANNER: 'true' }) });
+
     let stdout = '';
-    let stderr = '';
     if (stdiopts & EXEC_OPTIONS.WRITE_STDIN) {
       p0.stdin.write(`${stdin}\n`);
       p0.stdin.end(); /// this call seems necessary, at least with plain node.js executable
@@ -104,7 +104,7 @@ export function exec(t, command: string, args?: string[], opts?: {cwd?: string},
       }
     });
     p0.stderr.on('data', (data) => {
-      stderr += data.toString();
+      stdout += data.toString();
     });
     p0.on('exit', (code) => {
       if (code === 0) {
@@ -113,7 +113,7 @@ export function exec(t, command: string, args?: string[], opts?: {cwd?: string},
         stdout = stdout.replace(/Waiting for the debugger to disconnect.../, '').trimRight();
         resolve(stdout ?? undefined);
       } else {
-        reject(Error(`Failed to execute ${command} ${args.join(' ')} with exit-code ${code}\n${stderr}`));
+        reject(Error(`Failed to execute ${command} ${args.join(' ')} with exit-code ${code}\n${stdout}`));
       }
     });
   });
