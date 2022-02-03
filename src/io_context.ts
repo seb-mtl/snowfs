@@ -11,13 +11,12 @@ import { getDriveName } from 'drive-name';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import getDriveType = require("get-drive-type");
 
+import trash = require('trash');
+
 import AggregateError = require('es-aggregate-error');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PromisePool } = require('@supercharge/promise-pool');
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { trash } = require('trash');
 
 class StacklessError extends Error {
   constructor(message: string) {
