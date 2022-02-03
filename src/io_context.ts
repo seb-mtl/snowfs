@@ -6,6 +6,7 @@ import * as io from './io';
 import { spawn } from 'child_process';
 import { join, dirname, normalize, relative } from './path';
 import { getErrorMessage } from './common';
+import { getDriveName } from 'drive-name';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import getDriveType = require("get-drive-type");
@@ -70,6 +71,7 @@ export function getDrives(): Promise<Map<string, Drive>> {
   return promise.then((drives: Map<string, Drive>) => {
     for (const drive of Array.from(drives.values())) {
       drive.filesystem = getDriveType(drive.mountpoint);
+      drive.label = getDriveName(drive.mountpoint) || drive.label;
     }
     return drives;
   })
