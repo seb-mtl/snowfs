@@ -53,11 +53,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          lfs: true
+          node-version: 14.x
+      - name: Checkout LFS objects
+        run: git lfs pull
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: git config --local url."https://${{ secrets.PAT }}@github.com/".insteadOf ssh://git@github.com/
       - run: npm ci
 
       - name: Run Tests
