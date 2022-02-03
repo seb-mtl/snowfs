@@ -62,8 +62,11 @@ export function buildRootFromJson(repo: Repository, obj: any[]|any, parent: Tree
       obj.stats.birthtime = new Date(0);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     obj.stats.mtime = new Date(obj.stats.mtime);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     obj.stats.ctime = new Date(obj.stats.ctime);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     obj.stats.birthtime = new Date(obj.stats.birthtime);
   } else {
     obj.stats = {
@@ -1147,7 +1150,7 @@ export class Repository {
 
                 // We first use deleteOrTrash to delete/trash the item because it checks if the item is backed up
                 // in the version database and rather sends it to trash than destroying the data
-                const putToTrashImmediately = [];
+                const putToTrashImmediately: string[] = [];
                 tasks.push(() => deleteOrTrash(this, dst, alwaysDelete, putToTrashImmediately)
                   .then(() => {
                     // Since we replace the object, we can delete the object immediately and we don't
@@ -1284,7 +1287,7 @@ export class Repository {
     function markParentsAsModified(itemPath: string): void {
       // Create the parent strings from the status path and call flagDirAsModified
       // E.g. for hello/foo/bar/texture.psd we flag hello, hello/foo/ hello/foo/bar
-      const parents = [];
+      const parents: string[] = [];
       dirname(itemPath).split('/').reduce((a, b) => {
         const constructedPath = a ? `${a}/${b}` : b;
         parents.push(constructedPath);
@@ -1902,7 +1905,10 @@ export class Repository {
     for (const commit of Array.from(commits.values())) {
       const tmpCommit: any = commit;
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       tmpCommit.date = new Date(tmpCommit.date); // convert number from JSON into date object
+      
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       tmpCommit.lastModifiedDate = tmpCommit.lastModifiedDate ? new Date(tmpCommit.lastModifiedDate) : null; // convert number from JSON into date object
       tmpCommit.userData = tmpCommit.userData ?? {};
       tmpCommit.runtimeData = {};
@@ -1911,6 +1917,8 @@ export class Repository {
       const c: Commit = Object.setPrototypeOf(tmpCommit, Commit.prototype);
       c.repo = repo;
       c.root = buildRootFromJson(repo, c.root, null);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       repo.commitMap.set(tmpCommit.hash, c);
     }
 
