@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import * as fse from 'fs-extra';
+import * as chalk from 'chalk';
 
 import * as readline from 'readline';
 import {
@@ -14,9 +15,10 @@ import {
 } from './src/repository';
 import { TreeDir, TreeEntry, TreeFile } from './src/treedir';
 import { getDrives, IoContext } from './src/io_context';
+import { getErrorMessage } from './src/common';
 
-import * as program from 'commander';
-import * as chalk from 'chalk';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const program = require('commander');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AggregateError = require('es-aggregate-error');
