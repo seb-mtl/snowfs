@@ -42,7 +42,7 @@ export enum FILESYSTEM {
   UNKNOWN = 'unknown'
 }
 
-class Drive {
+export class Drive {
   constructor(public label: string, public mountpoint: string, public isNetworkDrive: boolean) { }
   filesystem: FILESYSTEM;
 }
