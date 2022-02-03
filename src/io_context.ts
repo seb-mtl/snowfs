@@ -150,7 +150,7 @@ export namespace win32 {
         child.on('exit', (exitcode: number | null) => {
           if (exitcode === 0) {
             try {
-              const networkDrives = new Map<string, Drive>();
+              const drives = new Map<string, Drive>();
   
               type DriveItem = {Name: string | null, Root: string | null, DisplayRoot: string | null};
               
@@ -161,14 +161,12 @@ export namespace win32 {
               }
   
               for (const mountpoint of driveItems) {
-                if (mountpoint.DisplayRoot) {
-                  networkDrives.set(mountpoint.Root, new Drive(mountpoint.Name, mountpoint.Root, mountpoint.DisplayRoot.startsWith('\\')));
-                }
+                drives.set(mountpoint.Root, new Drive(mountpoint.Name, mountpoint.Root, mountpoint.DisplayRoot?.startsWith('\\')));
               }
       
-              resolve(networkDrives);
+              resolve(drives);
             } catch (error) {
-              reject(new Error(`get-psdrive: ${error.message}`));
+              reject(new Error(`get-psdrive: ${getErrorMessage(error)}`));
             }
           } else {
             reject(new Error(`get-psdrive failed with ${exitcode}`));

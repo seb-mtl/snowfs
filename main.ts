@@ -658,7 +658,7 @@ program
   .description('List all connected drives in your computer, in all major operating systems')
   .action(async (opts: {input?: string, output?: string}) => {
     const drives = await getDrives();
-    console.log(JSON.stringify(drives.values(), null, opts.output === 'json' ? '' : '    '));
+    console.log(JSON.stringify(Array.from(drives.values()), null, opts.output === 'json' ? '' : '    '));
   });
 
 program
