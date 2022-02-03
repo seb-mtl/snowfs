@@ -143,7 +143,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -178,7 +178,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -221,7 +221,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -273,7 +273,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -342,7 +342,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -369,7 +369,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -456,7 +456,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -505,7 +505,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -647,7 +647,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }
@@ -731,7 +731,7 @@ program
         if (error instanceof AggregateError) {
           process.stderr.write(`fatal: ${error.errors.map((e) => e.message).join('\n')}`);
         } else {
-          process.stderr.write(`fatal: ${error.message}\n`);
+          process.stderr.write(`fatal: ${getErrorMessage(error)}\n`);
         }
         process.exit(-1);
       }

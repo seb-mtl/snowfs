@@ -14,7 +14,7 @@ import { buildRootFromJson, Repository, RepositoryInitOptions } from './reposito
 import { Commit } from './commit';
 import { Reference } from './reference';
 import {
-  calculateFileHash, FileInfo, HashBlock, StatsSubset,
+  calculateFileHash, FileInfo, getErrorMessage, HashBlock, StatsSubset,
 } from './common';
 import { TreeFile } from './treedir';
 import { IoContext } from './io_context';
@@ -97,7 +97,10 @@ export class Odb {
         return commits.map((commit: any) => {
           const tmpCommit = commit;
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           tmpCommit.date = new Date(tmpCommit.date); // convert number from JSON into date object
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           tmpCommit.lastModifiedDate = tmpCommit.lastModifiedDate ? new Date(tmpCommit.lastModifiedDate) : null; // convert number from JSON into date object
           tmpCommit.userData = tmpCommit.userData ?? {};
           tmpCommit.runtimeData = {};
@@ -122,7 +125,7 @@ export class Odb {
   }
 
   readReferences(): Promise<Reference[]> {
-    type DirItemAndReference = { ref: DirItem; content : any };
+    type DirItemAndReference = { ref: DirItem; content: any };
 
     const refsDir: string = join(this.repo.options.commondir, 'refs');
 
@@ -253,8 +256,8 @@ export class Odb {
             // This leads to the same dstFile, and despite 'overwrite:false',
             // concurrent write operations might make this function fail, so
             // we can safely ignore it
-            if (!error.message.startsWith('dest already exists')
-                && !error.message.startsWith('EPERM: operation not permitted, rename')) {
+            if (!getErrorMessage(error).startsWith('dest already exists')
+                && !getErrorMessage(error).startsWith('EPERM: operation not permitted, rename')) {
               throw error;
             }
           });

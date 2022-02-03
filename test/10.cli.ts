@@ -3,12 +3,11 @@ import test from 'ava';
 import * as fse from 'fs-extra';
 
 import { join, dirname, basename } from '../src/path';
-import {
-  exec, generateUniqueTmpDirName, EXEC_OPTIONS, getSnowexec,
-} from './helper';
+import { exec, generateUniqueTmpDirName, EXEC_OPTIONS, getSnowexec } from './helper';
 import { COMMIT_ORDER, REFERENCE_TYPE, Repository } from '../src/repository';
 import { Reference } from '../src/reference';
 import { DirItem, OSWALK, osWalk } from '../src/io';
+import { getErrorMessage } from '../src/common';
 
 // test doesn't work on the GitHub runners
 // https://github.com/seb-mtl/SnowFS/runs/1923599289?check_suite_focus=true#step:7:245
@@ -103,7 +102,7 @@ test('snow switch', async (t) => {
   // ... and one added (abc.txt)
 
   const error = await t.throwsAsync(async () => exec(t, snow, ['switch', 'branch-0'], { cwd: snowWorkdir }, EXEC_OPTIONS.RETURN_STDOUT));
-  const lines = error.message.split('\n');
+  const lines = getErrorMessage(error).split('\n');
   t.true(lines.includes('A abc3.txt')); // abc3.txt got added in the working dir
   t.true(lines.includes('M abc0.txt')); // abc0.txt got added in the working dir
   // abc1.txt did not get reported as deleted because switch/checkout don't mind if a file got deleted by the user since it can be restored
@@ -209,7 +208,7 @@ test('snow checkout', async (t) => {
   // ... and one added (abc.txt)
 
   const error = await t.throwsAsync(async () => exec(t, snow, ['checkout', allCommits[1].hash], { cwd: snowWorkdir }, EXEC_OPTIONS.RETURN_STDOUT));
-  const lines = error.message.split('\n');
+  const lines = getErrorMessage(error).split('\n');
   t.true(lines.includes('A abc3.txt')); // abc3.txt got added in the working dir
   t.true(lines.includes('M abc0.txt')); // abc0.txt got added in the working dir
   // abc1.txt did not get reported as deleted because switch/checkout don't mind if a file got deleted by the user since it can be restored
@@ -275,7 +274,7 @@ test('snow branch foo-branch', async (t) => {
   // Don't create a branch twice
   // snow branch foo-branch
   error = await t.throwsAsync(async () => exec(t, snow, ['branch', 'foo-branch'], { cwd: snowWorkdir }, EXEC_OPTIONS.RETURN_STDOUT));
-  t.true(error.message.includes("A branch named 'foo-branch' already exists."));
+  t.true(getErrorMessage(error).includes("A branch named 'foo-branch' already exists."));
 
   // Create a branch with a different starting point
   // snow branch bar-branch 768FF3AA8273DFEB81E7A111572C823EA0850499
@@ -306,9 +305,9 @@ test('snow branch foo-branch', async (t) => {
 
   if (process.platform === 'darwin') {
     // on macOS 'process.cwd()' in the branch command returns /private/var/...
-    t.true(error.message.includes(`Cannot delete branch '${checkedOutBranch}' checked out at '/private${repoAfter2.workdir()}'`));
+    t.true(getErrorMessage(error).includes(`Cannot delete branch '${checkedOutBranch}' checked out at '/private${repoAfter2.workdir()}'`));
   } else {
-    t.true(error.message.includes(`Cannot delete branch '${checkedOutBranch}' checked out at '${repoAfter2.workdir()}'`));
+    t.true(getErrorMessage(error).includes(`Cannot delete branch '${checkedOutBranch}' checked out at '${repoAfter2.workdir()}'`));
   }
 });
 
@@ -504,7 +503,7 @@ test('snow rm file-does-not-exist', async (t) => {
   await exec(t, snow, ['commit', '-m', 'First commit'], { cwd: snowWorkdir });
 
   const error = await t.throwsAsync(async () => exec(t, snow, ['rm', 'file-does-not-exist'], { cwd: snowWorkdir }));
-  t.true(error.message.includes('fatal: ENOENT: no such file or directory, stat'));
+  t.true(getErrorMessage(error).includes('fatal: ENOENT: no such file or directory, stat'));
 
   // TODO: (Fix getStatus to differ between worktree and staging area)
   // const stdout = await exec(t, snow, ['status', '--output=json-pretty'], { cwd: subdir }, EXEC_OPTIONS.RETURN_STDOUT);
@@ -560,7 +559,7 @@ test('Commit User Data --- FAIL INVALID INPUT', async (t) => {
     EXEC_OPTIONS.RETURN_STDOUT | EXEC_OPTIONS.WRITE_STDIN, '--user-data: garbage-because-json-object-expected'));
 
   const errorMsgSub = 'fatal: invalid user-data: SyntaxError: Unexpected token g in JSON at position 0';
-  t.true(error.message.includes(errorMsgSub));
+  t.true(getErrorMessage(error).includes(errorMsgSub));
 });
 
 test('Commit Tags --- STORE AND LOAD IDENTICAL', async (t) => {
@@ -670,7 +669,7 @@ test('Branch User Data --- FAIL INVALID INPUT', async (t) => {
     EXEC_OPTIONS.RETURN_STDOUT | EXEC_OPTIONS.WRITE_STDIN, '--user-data: garbage-because-json-object-expected'));
 
   const errorMsgSub = 'fatal: invalid user-data: SyntaxError: Unexpected token g in JSON at position 0';
-  t.true(error.message.includes(errorMsgSub));
+  t.true(getErrorMessage(error).includes(errorMsgSub));
   t.log('Test failed as expected');
 });
 
@@ -745,7 +744,7 @@ test('Multi-Index -- FAIL INVALID INPUT TEST 1', async (t) => {
   const error = await t.throwsAsync(async () => exec(t, snow, ['add', '.', '--index', 'non-existing-index'], { cwd: snowWorkdir }));
 
   const errorMsgSub = 'fatal: unknown index: non-existing-index';
-  t.true(error.message.includes(errorMsgSub));
+  t.true(getErrorMessage(error).includes(errorMsgSub));
   t.log('Test failed as expected');
 });
 

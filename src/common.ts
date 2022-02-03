@@ -157,7 +157,7 @@ export function compareFileHash(filepath: string, filehash: string, hashBlocks?:
     });
   }).catch((error: Error) => {
     // return false because it is an expected error
-    if (error.message === 'hashblock different') { return false; }
+    if (getErrorMessage(error) === 'hashblock different') { return false; }
 
     throw error;
   });
@@ -266,4 +266,11 @@ export function jsonCompliant(s : string) : string {
 
 export function sleep(time: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error)
 }

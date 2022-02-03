@@ -1,12 +1,11 @@
 import test from 'ava';
-import { assert } from 'console';
-import * as fse from 'fs-extra';
-import { Index } from '../src';
 import { Commit } from '../src/commit';
-import { join } from '../src/path';
+import { getErrorMessage } from '../src/common';
 import { Reference } from '../src/reference';
-import { REFERENCE_TYPE, Repository, RepositoryInitOptions, RESET } from '../src/repository';
+import { REFERENCE_TYPE, Repository, RESET } from '../src/repository';
 import { getRandomPath, shuffleArray } from './helper';
+
+import * as fse from 'fs-extra';
 
 export function getBranchNames(): Set<string> {
   return new Set(['Yellow Track',
@@ -115,7 +114,7 @@ test('Repository.basic.fail', async (t) => {
   const repo1: Repository = await createRepo();
   const repo2: Repository = await createRepo();
   const error = t.throws(() => Repository.merge(repo1, repo2, getBranchNames()));
-  t.is(error.message, 'refusing to merge unrelated histories');
+  t.is(getErrorMessage(error), 'refusing to merge unrelated histories');
 });
 
 test('Repository.merge0', async (t) => {

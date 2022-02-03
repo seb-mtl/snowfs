@@ -5,6 +5,7 @@ import * as io from './io';
 
 import { spawn } from 'child_process';
 import { join, dirname, normalize, relative } from './path';
+import { getErrorMessage } from './common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import getDriveType = require("get-drive-type");
@@ -178,7 +179,7 @@ export namespace win32 {
           reject();
         });
       } catch (error) {
-        reject(new Error(`initWindowsNetworkDrives spawn failed: ${error.message}`));
+        reject(new Error(`initWindowsNetworkDrives spawn failed: ${getErrorMessage(error)}`));
       }
     });
   }
@@ -460,14 +461,15 @@ export class IoContext {
 
   init(): Promise<void> {
     if (process.platform !== 'darwin') {
+      this.drives = new Map();
       this.valid = true;
       return Promise.resolve();
     } else {
       return getDrives()
         .then((drives: Map<string, Drive>) => {
           this.mountpoints = new Set();
-          this.drives = new Map();
-    
+          this.drives = drives;
+
           for (const drive of Array.from(drives.values())) {
             if (!drive.mountpoint.startsWith('/System/')) {
               this.mountpoints.add(normalize(drive.mountpoint));

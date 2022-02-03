@@ -11,6 +11,7 @@ import { Commit } from '../src/commit';
 import { Reference } from '../src/reference';
 import { COMMIT_ORDER, Repository } from '../src/repository';
 import { getRandomPath } from './helper';
+import { getErrorMessage } from '../src/common';
 
 test('repo commondir', async (t) => {
   const repoPath = getRandomPath();
@@ -129,6 +130,6 @@ test('repo protected locations', async (t) => {
   for (const path of [homedir, documents, desktop, downloads]) {
     t.log(`Test to ensure no repo can be created at ${path}`);
     const error = t.throws(() => Repository.initExt(path));
-    t.is(error.message, 'this location cannot be used as a repository');
+    t.is(getErrorMessage(error), 'this location cannot be used as a repository');
   }
 });

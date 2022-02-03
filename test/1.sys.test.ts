@@ -13,7 +13,7 @@ import { DirItem, OSWALK, osWalk } from '../src/io';
 import { IoContext, TEST_IF } from '../src/io_context';
 import {
   calculateFileHash,
-  compareFileHash, getRepoDetails, LOADING_STATE, MB100,
+  compareFileHash, getErrorMessage, getRepoDetails, LOADING_STATE, MB100,
 } from '../src/common';
 import { createRandomString, shuffleArray } from './helper';
 import {
@@ -172,7 +172,7 @@ test('osWalk test#1', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -218,7 +218,7 @@ test('osWalk test#2a', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -259,7 +259,7 @@ test('osWalk test#2', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -300,7 +300,7 @@ test('osWalk test#3', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -328,7 +328,7 @@ test('osWalk test#4', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -348,7 +348,7 @@ test('osWalk test#5', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -379,7 +379,7 @@ test('osWalk test#6', async (t) => {
     async function executeOsWalk(): Promise<void> {
       const dirItems: DirItem[] = await osWalk(tmpDir, OSWALK.DIRS | OSWALK.FILES)
         .catch((error) => {
-          t.fail(error.message); // osWalk must never fail while we delete files from a directory
+          t.fail(getErrorMessage(error)); // osWalk must never fail while we delete files from a directory
           return [];
         });
       iteratedOverFiles.push(dirItems.length);
@@ -411,7 +411,7 @@ test('osWalk test#6', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -442,7 +442,7 @@ test('osWalk test#7', async (t) => {
     async function executeOsWalk(): Promise<void> {
       const dirItems: DirItem[] = await osWalk(tmpDir, OSWALK.DIRS | OSWALK.FILES)
         .catch((error) => {
-          t.fail(error.message); // osWalk must never fail while we delete files from a directory
+          t.fail(getErrorMessage(error)); // osWalk must never fail while we delete files from a directory
           return [];
         });
       iteratedOverFiles.push(dirItems.length);
@@ -486,7 +486,7 @@ test('osWalk test#7', async (t) => {
     fse.rmdirSync(tmpDir, { recursive: true });
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -548,14 +548,14 @@ test('getRepoDetails (no git directory nor snowtrack)', async (t) => {
       )
       .catch((error) => {
         if (errorMessage) {
-          if (!error.message.startsWith(errorMessage)) {
+          if (!getErrorMessage(error).startsWith(errorMessage)) {
             t.fail(
-              `Exepceted error message, but received wrong one: ${error.message}`,
+              `Exepceted error message, but received wrong one: ${getErrorMessage(error)}`,
             );
             throw error;
           }
         } else {
-          t.fail(error.message);
+          t.fail(getErrorMessage(error));
         }
       })
       .finally(() => {
@@ -571,7 +571,7 @@ test('getRepoDetails (no git directory nor snowtrack)', async (t) => {
     );
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -605,7 +605,7 @@ test('getRepoDetails (.git)', async (t) => {
         },
       )
       .catch((error) => {
-        t.fail(error.message);
+        t.fail(getErrorMessage(error));
       })
       .finally(() => {
         fse.rmdirSync(tmpDir, { recursive: true });
@@ -617,7 +617,7 @@ test('getRepoDetails (.git)', async (t) => {
     await runTest('foo');
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -655,7 +655,7 @@ test('getRepoDetails (.git and .snow)', async (t) => {
         },
       )
       .catch((error) => {
-        t.fail(error.message);
+        t.fail(getErrorMessage(error));
       })
       .finally(() => {
         fse.rmdirSync(tmpDir, { recursive: true });
@@ -669,7 +669,7 @@ test('getRepoDetails (.git and .snow)', async (t) => {
     await runTest('cube.blend');
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -705,13 +705,13 @@ test('getRepoDetails (parent of .git and .snow)', async (t) => {
         },
       )
       .catch((error) => {
-        t.fail(error.message);
+        t.fail(getErrorMessage(error));
       })
       .finally(() => {
         fse.rmdirSync(tmpDir, { recursive: true });
       });
   } catch (error) {
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -767,7 +767,7 @@ test('compareFileHash test', async (t) => {
     }
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -785,7 +785,7 @@ test('fss.writeSafeFile test', async (t) => {
     t.is(fse.readFileSync(tmpFile).toString(), 'Foo2');
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -922,7 +922,7 @@ async function performReadLockCheckTest(t, fileCount: number): Promise<void> {
     }
   } catch (error) {
     t.log('Ensure that files are accessed by another process.');
-    t.true(error.message.includes('Your files are accessed by'));
+    t.true(getErrorMessage(error).includes('Your files are accessed by'));
   }
 
   for (const [, handle] of fileHandles) {
@@ -1019,7 +1019,7 @@ if (process.platform === 'win32') {
     try {
       await performReadLockCheckTest(t, 0);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 
@@ -1027,7 +1027,7 @@ if (process.platform === 'win32') {
     try {
       await performReadLockCheckTest(t, 1);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 
@@ -1035,7 +1035,7 @@ if (process.platform === 'win32') {
     try {
       await performReadLockCheckTest(t, 100);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 
@@ -1043,7 +1043,7 @@ if (process.platform === 'win32') {
     try {
       await performReadLockCheckTest(t, 1000);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 
@@ -1051,7 +1051,7 @@ if (process.platform === 'win32') {
     try {
       await performReadLockCheckTest(t, 10000);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 } else {
@@ -1060,7 +1060,7 @@ if (process.platform === 'win32') {
       // On Linux and macOS we want to test for read+write handles
       await performReadWriteLockCheckTest(t, 3, 3);
     } catch (error) {
-      t.fail(error.message);
+      t.fail(getErrorMessage(error));
     }
   });
 }
@@ -1069,7 +1069,7 @@ test('performFileAccessCheck / 0 file', async (t) => {
   try {
     await performWriteLockCheckTest(t, 0);
   } catch (error) {
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -1077,7 +1077,7 @@ test('performFileAccessCheck / 1 file', async (t) => {
   try {
     await performWriteLockCheckTest(t, 1);
   } catch (error) {
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -1086,7 +1086,7 @@ test('performFileAccessCheck / 10 file', async (t) => {
     await performWriteLockCheckTest(t, 10);
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -1095,7 +1095,7 @@ test('performFileAccessCheck / 100 file', async (t) => {
     await performWriteLockCheckTest(t, 100);
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -1104,7 +1104,7 @@ test('performFileAccessCheck / 1000 file', async (t) => {
     await performWriteLockCheckTest(t, 1000);
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
@@ -1142,7 +1142,7 @@ test('performFileAccessCheck / no access', async (t) => {
     }
   } catch (error) {
     console.error(error);
-    t.fail(error.message);
+    t.fail(getErrorMessage(error));
   }
 });
 
