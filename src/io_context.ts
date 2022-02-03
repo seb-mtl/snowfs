@@ -267,17 +267,20 @@ export class FileHandle {
 export function getDrives(): Promise<Map<string, Drive>> {
 
   return new Promise((resolve, reject) => {
+    const cmd = "/bin/df";
+    
+    const cmdArgs: string[] = process.platform === 'darwin' ?
+                                ["-n", /* -n Print out the previously obtained statistics from the filesystems.
+                                          This option should be used if it is possible that one or more
+                                          filesystems are in a state such that they will not be able to
+                                          provide statistics without a long delay.  When this option is
+                                          specified, df will not request new statistics from the filesystems,
+                                          but will respond with the possibly stale statistics that were
+                                          previously obtained.
+                                        */
+                                ] : [];
     try {
-      const child = cp.spawn("/bin/df", [
-                                        "-n", /* -n Print out the previously obtained statistics from the filesystems.
-                                              This option should be used if it is possible that one or more
-                                              filesystems are in a state such that they will not be able to
-                                              provide statistics without a long delay.  When this option is
-                                              specified, df will not request new statistics from the filesystems,
-                                              but will respond with the possibly stale statistics that were
-                                              previously obtained.
-                                            */
-                                        ]);
+      const child = cp.spawn(cmd, cmdArgs);
       const drives = new Map<string, Drive>();
     
       let stdout = Buffer.from([]);
@@ -298,11 +301,11 @@ export function getDrives(): Promise<Map<string, Drive>> {
           }
           resolve(drives);
         } else {
-          reject(new Error(`df -n -P failed with ${exitcode}`));
+          reject(new Error(`${cmd} ${cmdArgs.join(' ')}failed with ${exitcode}`));
         }
       });
     } catch (error) {
-      reject(new Error(`initWindowsNetworkDrives spawn failed: ${getErrorMessage(error)}`));
+      reject(new Error(`getDrives spawn failed: ${getErrorMessage(error)}`));
     }
   });
 }
