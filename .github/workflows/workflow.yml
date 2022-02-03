@@ -15,19 +15,19 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-    
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          lfs: true
-          node-version: 14.x
-      - name: Checkout LFS objects
-        run: git lfs pull
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: npm install
+      - run: npm ci
 
       - name: npm run benchmark
         run: |
@@ -37,8 +37,14 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
-    
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
@@ -49,7 +55,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: npm install
+      - run: npm ci
 
       - name: npm run benchmark
         run: |
@@ -60,19 +66,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          lfs: true
-          node-version: 14.x
-      - name: Checkout LFS objects
-        run: git lfs pull
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: npm install
+      - run: git config --local url."https://${{ secrets.PAT }}@github.com/".insteadOf ssh://git@github.com/
+      - run: npm ci
 
       - name: Run Tests
         run: npm run ava
@@ -108,8 +115,14 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
-    
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
@@ -120,7 +133,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: npm install
+      - run: npm ci
 
       - name: Run Tests
         run: npm run ava
@@ -156,8 +169,14 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-    
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
       - uses: actions/setup-node@v2
         with:
           lfs: true
@@ -168,7 +187,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-v9-${{ hashFiles('**/package-lock.json') }}
-      - run: npm install
+      - run: npm ci
 
       - name: Run Tests
         run: npm run ava
