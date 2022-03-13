@@ -81,7 +81,6 @@ export function checkReadAccess(absPaths: string[], relPaths: string[]): Promise
 
   return Promise.all(promises)
     .then((stats: fse.Stats[]) => {
-
       for (let i = 0; i < relPaths.length; ++i) {
         stats1.set(relPaths[i], stats[i]);
       }
@@ -101,7 +100,6 @@ export function checkReadAccess(absPaths: string[], relPaths: string[]): Promise
       return Promise.all(promises);
     })
     .then((stats: fse.Stats[]) => {
-
       const errors: Error[] = [];
 
       for (let i = 0; i < relPaths.length; ++i) {
@@ -657,7 +655,6 @@ export class IoContext {
           return unix.whichFilesInDirAreOpen(dir);
         })
         .then((fileHandles: Map<string, unix.FileHandle[]>) => {
-
           const zip = (a, b) => a.map((k, i) => [k, b[i]]);
 
           const errors: Error[] = [];
@@ -680,6 +677,7 @@ export class IoContext {
                     errors.push(new StacklessError(msg));
                     break;
                   }
+                  // no default
                 }
               }
             }
@@ -695,7 +693,7 @@ export class IoContext {
           return checkReadAccess(absPaths, relPaths);
         })
         .then(() => {
-        })
+        });
     }
 
     switch (process.platform) {
