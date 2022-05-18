@@ -64,7 +64,7 @@
     "micromatch": "^4.0.4",
     "rxjs": "6.6.7",
     "sort-paths": "^1.1.1",
-    "trash": "^7.2.0"
+    "trash": "8.1.0"
   },
   "optionalDependencies": {
     "winattr": "^3.0.0"

@@ -8,9 +8,11 @@ import {
 } from './path';
 import * as io from './io';
 
-import trash = require('trash');
 import AggregateError = require('es-aggregate-error');
 import drivelist = require('drivelist');
+
+import trash from 'trash';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PromisePool } = require('@supercharge/promise-pool');
 
